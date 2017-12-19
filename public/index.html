@@ -36,6 +36,7 @@ function component(width, height, color, x, y, type) {
   this.gravity = 0.4;
   this.gravitySpeed = 0;
   this.jumped = true;
+  this.platform = 0;
   this.update = function() {
     ctx = myGameArea.context;
     if (type == "image") {
@@ -69,18 +70,28 @@ function component(width, height, color, x, y, type) {
 	this.checkPos();
   }
   this.checkPos = function() {
-	bottom = getBottom(this.y);
-	console.log("y: " + this.y + " bottom: " + bottom);
-	if (this.y >= bottom) {
-		this.y = bottom;
+	this.platform = getPlatform(this.y);
+	if (this.platform == 0 && this.y >= 360) {
+		this.y = 360;
 		this.gravitySpeed = 0;
+		this.jumped = false;
+	} else if (this.platform == 1 && this.y >= 95) {
+		this.y = 110;
+		this.gravitySpeed = 0;
+		this.jumped = false;
+	} else if (this.platform == 2 && this.y >= 175) {
+		this.y = 190;
+		this.gravitySpeed = 0;
+		this.jumped = false;
+	} else if (this.platform == 3 && this.y >= 255) {
+		this.y = 270;
 		this.jumped = false;
 	}
 		
   }
 }
 
-var getBottom = function(y) {
+var getPlatform = function(y, platform) {
 	for (var i = 0; i < platforms.length; i++) {
 		var starta = 4.7123 - platforms[i].height + 0.03;
 		if (starta < 0) starta += 2*Math.PI;
@@ -88,13 +99,13 @@ var getBottom = function(y) {
 		var enda = starta - (platforms[i].color - platforms[i].height) - 0.02;
 		if (enda < 0) enda += 2*Math.PI;
 		else if (enda > 2*Math.PI) enda -= 2*Math.PI;
-		ybound = 840 - platforms[i].width;
-		if(globe.angle < starta && globe.angle > enda && y <= ybound) {
-			return ybound + 10;
+		ybound = 850 - platforms[i].width;
+		if (globe.angle < starta && globe.angle > enda)  {
+			if (y <= ybound) return i + 1;
 		}
 			
 	}
-	return 360;
+	return 0;
 }
 	
 
