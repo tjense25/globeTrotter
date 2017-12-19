@@ -14,8 +14,11 @@ canvas {
 var globe;
 function startGame() {
     myGameArea.start();
-    globe = new component(1000, 1000, "/images/globe.png", 400, 900, "image")
-    gayguy = new component(50, 50, "red", 400, 360)
+    globe = new component(1000, 1000, "/images/globe.png", 400, 900, "image");
+    platforms = [new component(580, 0, .333*Math.PI, 400, 900, "arc"),
+		 new component(660, 0.37*Math.PI, 0.6*Math.PI, 400, 900, "arc"),
+		 new component(740, .25*Math.PI, 0.46*Math.PI, 400, 900, "arc")];
+    gayguy = new component(50, 50, "red", 400, 360);
 }
 
 function component(width, height, color, x, y, type) {
@@ -29,9 +32,10 @@ function component(width, height, color, x, y, type) {
   this.height = height;
   this.x = x;
   this.y = y; 
+  this.color = color;
   this.gravity = 0.4;
   this.gravitySpeed = 0;
-  this.jumped = false;
+  this.jumped = true;
   this.update = function() {
     ctx = myGameArea.context;
     if (type == "image") {
@@ -44,26 +48,35 @@ function component(width, height, color, x, y, type) {
         this.height / -2,
         this.width, this.height);
       ctx.restore();
+    } else if (type == "arc") {
+        ctx.save();
+        ctx.translate(this.x, this.y);        
+        ctx.rotate(globe.angle);
+	ctx.lineWidth = 15;
+	ctx.strokeStyle="white";
+	ctx.beginPath();
+	ctx.arc(0, 0, this.width, this.height, this.color);
+	ctx.stroke();
+        ctx.restore();
     } else {
-      ctx.fillStyle = color;
+      ctx.fillStyle = this.color;
       ctx.fillRect(this.x, this.y, this.width, this.height);
     }
   }
   this.newPos = function() {
-	if(this.jumped) this.gravitySpeed += this.gravity;
-	if(this.jumped) this.y += this.gravitySpeed;
+	this.gravitySpeed += this.gravity;
+	this.y += this.gravitySpeed;
 	this.checkPos();
   }
   this.checkPos = function() {
-	var bottom = 360;
-	if (this.y > bottom) {
+	if (globe.angle < 4.7823 && globe.angle > 3.6768 && this.y <= 260) bottom = 270;
+	else if (globe.angle > 4.7823 || globe.angle < 3.6768) bottom = 360;
+	if (this.y >= bottom) {
 		this.y = bottom;
-		this.gravitySpeed = -9.2;
+		this.gravitySpeed = 0;
 		this.jumped = false;
 	}
-	else if (this.y < 250) {
-		this.gravitySpeed = 0;
-	}
+		
   }
 }
 
@@ -96,8 +109,16 @@ function updateGameArea() {
     myGameArea.clear();
     if (myGameArea.keys && myGameArea.keys[37]) globe.angle += 0.5*Math.PI / 180;
     if (myGameArea.keys && myGameArea.keys[39]) globe.angle -= 0.5*Math.PI / 180;
-    if (!gayguy.jumped && myGameArea.keys && myGameArea.keys[38]) gayguy.jumped = true;
+    if (!gayguy.jumped && myGameArea.keys && myGameArea.keys[38]) {
+	gayguy.jumped = true;
+	gayguy.gravitySpeed = -9.2;
+    }
     globe.update();
+    if (globe.angle < 0) globe.angle = 2*Math.PI;
+    else if (globe.angle > 2*Math.PI) globe.angle = 0;
+    for (var i = 0; i < platforms.length; i++) {
+	platforms[i].update();
+    }
     gayguy.newPos();
     gayguy.update();
 }
