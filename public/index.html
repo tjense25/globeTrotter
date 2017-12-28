@@ -10,14 +10,15 @@ canvas {
 </style>
 </head>
 <body onload="startGame()">
+<script src="javascripts/platform.js"> </script>
 <script>
 var globe;
 function startGame() {
     myGameArea.start();
     globe = new component(1000, 1000, "/images/globe.png", 400, 900, "image");
-    platforms = [new component(740, .25*Math.PI, 0.33*Math.PI, 400, 900, "arc"),
-		 new component(660, 0.36*Math.PI, 0.6*Math.PI, 400, 900, "arc"),
-		 new component(580, 0, .3*Math.PI, 400, 900, "arc")];
+    platforms = [new Platform(400, 900, 740, .25*Math.PI, 0.33*Math.PI),
+		 new Platform(400, 900, 660, 0.36*Math.PI, 0.6*Math.PI),
+		 new Platform(400, 900, 580, 0, .3*Math.PI)];
     gayguy = new component(50, 50, "red", 400, 360);
 }
 
@@ -49,16 +50,6 @@ function component(width, height, color, x, y, type) {
         this.height / -2,
         this.width, this.height);
       ctx.restore();
-    } else if (type == "arc") {
-        ctx.save();
-        ctx.translate(this.x, this.y);        
-        ctx.rotate(globe.angle);
-	ctx.lineWidth = 15;
-	ctx.strokeStyle="white";
-	ctx.beginPath();
-	ctx.arc(0, 0, this.width, this.height, this.color);
-	ctx.stroke();
-        ctx.restore();
     } else {
       ctx.fillStyle = this.color;
       ctx.fillRect(this.x, this.y, this.width, this.height);
@@ -70,44 +61,13 @@ function component(width, height, color, x, y, type) {
 	this.checkPos();
   }
   this.checkPos = function() {
-	this.platform = getPlatform(this.y);
-	if (this.platform == 0 && this.y >= 360) {
+	if (this.y >= 360) {
 		this.y = 360;
 		this.gravitySpeed = 0;
 		this.jumped = false;
-	} else if (this.platform == 1 && this.y >= 95) {
-		this.y = 110;
-		this.gravitySpeed = 0;
-		this.jumped = false;
-	} else if (this.platform == 2 && this.y >= 175) {
-		this.y = 190;
-		this.gravitySpeed = 0;
-		this.jumped = false;
-	} else if (this.platform == 3 && this.y >= 255) {
-		this.y = 270;
-		this.jumped = false;
 	}
-		
   }
 }
-
-var getPlatform = function(y, platform) {
-	for (var i = 0; i < platforms.length; i++) {
-		var starta = 4.7123 - platforms[i].height + 0.03;
-		if (starta < 0) starta += 2*Math.PI;
-		else if (starta > 2*Math.PI) starta -= 2*Math.PI;
-		var enda = starta - (platforms[i].color - platforms[i].height) - 0.02;
-		if (enda < 0) enda += 2*Math.PI;
-		else if (enda > 2*Math.PI) enda -= 2*Math.PI;
-		ybound = 850 - platforms[i].width;
-		if (globe.angle < starta && globe.angle > enda)  {
-			if (y <= ybound) return i + 1;
-		}
-			
-	}
-	return 0;
-}
-	
 
 var myGameArea = {
     canvas : document.createElement("canvas"),
