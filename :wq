@@ -37,8 +37,6 @@ function component(width, height, color, x, y, type) {
   this.gravity = 0.4;
   this.gravitySpeed = 0;
   this.jumped = true;
-  this.platform = -1;
-  this.bottom = 360;
   this.update = function() {
     ctx = myGameArea.context;
     if (type == "image") {
@@ -59,26 +57,17 @@ function component(width, height, color, x, y, type) {
   this.newPos = function() {
 	this.gravitySpeed += this.gravity;
 	this.y += this.gravitySpeed;
-//	console.log(this.y);
-//	console.log(globe.angle);
 	this.checkPos();
   }
   this.checkPos = function() {
-    this.platform = this.getPlatform();
-    console.log(this.platform);
-    if (this.y >= this.bottom) {
-	this.y = this.bottom;
-	this.gravitySpeed = 0;
-	this.jumped = false;
-    }
-  }
-  this.getPlatform = function() {
 	for (var i = 0; i < platforms.length; i++) {
-		if (platforms[i].inRange(globe.angle)) {
-			if (this.y <= platforms[i].height) return i;
-		}
+		if (platforms[i].inRange(globe.angle)) console.log(i);
 	}
-	return -1;
+	if (this.y >= 360) {
+		this.y = 360;
+		this.gravitySpeed = 0;
+		this.jumped = false;
+	}
   }
 }
 
